@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link href="node_modules/jquery-toast-plugin/dist/jquery.toast.min.css" rel="stylesheet">
+    <link href="static/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <title>Genesys PureCloud makeCall Functionality</title>
+
+</head>
+
+<body>
+
+
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script src="https://sdk-cdn.mypurecloud.com/javascript/61.0.0/purecloud-platform-client-v2.min.js"></script>
+    <script src="node_modules/jquery-toast-plugin/dist/jquery.toast.min.js"></script>
+    <script src="static/js/purecloud.js"></script>
+    <script src="static/js/notifications.js"></script>
+
+    <center>
+
+        <div>
+
+            <br>
+            <button type="button" id="send" class="btn btn-info"> Send</button>
+
+            <!--  <input type="text" id="txtMessage" class="form-control" placeholder="message body"></input> -->
+
+        </div>
+        <br>
+        <input type="text" id="txtPhoneNumber" class="" placeholder="phoneNumber" width="200px"></input>
+
+    </center>
+    <script>
+
+
+        // Read a page's GET URL variables and return them as an associative array.
+
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+
+
+        let queueId = getUrlVars()["queueId"];
+        let phoneNumber = getUrlVars()["phoneNumber"];
+
+
+        // Fix PhoneNumber. In case it is tel: at the begining.
+        if (phoneNumber && phoneNumber.length > 5) {
+            if (phoneNumber.substring(0, 4) == 'tel:') {
+                phoneNumber = phoneNumber.substring(4)
+
+            }
+        }
+
+        $("#txtPhoneNumber").val(phoneNumber);
+
+        $("#send").click(() => {
+            // Get user' s name sendSMS().then(()=> {
+            // Display the card with the user's name
+            if ($("#txtPhoneNumber").val().length < 5) {
+                showMessage('Phone number is required', true);
+            } else {
+                placeCall($("#txtPhoneNumber").val(), queueId).then(async (requests) => {
+
+                }).catch((err) => {
+                    console.error("Failed send SMS");
+                    showMessage(err, true);
+                });
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
