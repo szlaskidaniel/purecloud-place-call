@@ -13,7 +13,7 @@ let apiInstance = new platformClient.ConversationsApi();
 
 
 // Authenticate
-client.loginImplicitGrant("89f29367-dc0e-4fd0-9f55-7175a73ee600", redirectUri)
+client.loginImplicitGrant("c65435ce-fe72-42af-a2d5-604c6016b487", redirectUri)
     .then(() => {
         // Make request to GET /api/v2/users/me?expand=presence
         console.log('Logged-In');
