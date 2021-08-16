@@ -38,13 +38,16 @@
         <div>
 
             <br>
-            <button type="button" id="send" class="btn btn-info"> Place Call</button>
+            <button type="button" id="send" class="btn btn-info">Start Recording</button>
+
+            <button type="button" id="cancel" class="btn btn-info">Stop Recording</button>
+
 
             <!--  <input type="text" id="txtMessage" class="form-control" placeholder="message body"></input> -->
 
         </div>
         <br>
-        <input type="text" id="txtPhoneNumber" class="" placeholder="phoneNumber" width="200px"></input>
+        <!-- <input type="text" id="txtPhoneNumber" class="" placeholder="phoneNumber" width="200px"></input> -->
 
     </center>
     <script>
@@ -64,42 +67,45 @@
         }
 
 
-        let queueId = getUrlVars()["queueId"];
-        let phoneNumber = getUrlVars()["phoneNumber"];
+        // let queueId = getUrlVars()["queueId"];
+        // let phoneNumber = getUrlVars()["phoneNumber"];
 
+        let conversationId = getUrlVars()["conversationId"];
+        let participantId = getUrlVars()["participantId"];
+        let remoteNumber = getUrlVars()["remoteNumber"];
 
         // Fix PhoneNumber. In case it is tel: at the begining.
-        if (phoneNumber && phoneNumber.length > 5) {
-            if (phoneNumber.substring(0, 4) == 'tel:') {
-                phoneNumber = phoneNumber.substring(4)
+        // if (phoneNumber && phoneNumber.length > 5) {
+        //     if (phoneNumber.substring(0, 4) == 'tel:') {
+        //         phoneNumber = phoneNumber.substring(4)
 
-            }
-        }
+        //     }
+        // }
 
-        $("#txtPhoneNumber").val(phoneNumber);
+        //$("#txtPhoneNumber").val(phoneNumber);
 
         $("#send").click(() => {
-            // Get user' s name sendSMS().then(()=> {
-            // Display the card with the user's name
-            if ($("#txtPhoneNumber").val().length < 5) {
-                showMessage('Phone number is required', true);
-            } else {
-                placeCall($("#txtPhoneNumber").val(), queueId).then(async (requests) => {
-
+            consultTransfer(conversationId, participantId, remoteNumber).then(async (requests) => {
+                    console.log('success');
                 }).catch((err) => {
-                    console.error("Failed send SMS");
-                    showMessage(err, true);
+                    console.error("Failed to call API");
+                    //showMessage(err, true);
                 });
-            }
+
+        });
+
+        $("#cancel").click(() => {
+            consultTransferCancel(conversationId, participantId).then(async (requests) => {
+                    console.log('success');
+                }).catch((err) => {
+                    console.error("Failed to call API");
+                    //showMessage(err, true);
+                });
 
         });
 
     </script>
 
-    <script>var organizations = localStorage.getItem("GM_organizations"); $("#send").click(() => { alert(organizations); }) </script>
-
-
-   
 
 
 </body>

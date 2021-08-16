@@ -1,6 +1,6 @@
 // **** Token Implicit Grant (Browser) - UserLogin ****
-let redirectUri = 'https://szlaskidaniel.github.io/purecloud-place-call/index.html';
-//redirectUri = 'https://localhost/index.html';
+//let redirectUri = 'https://szlaskidaniel.github.io/purecloud-place-call/index.html';
+redirectUri = 'https://localhost/index.html';
 const platformClient = require('platformClient');
 const client = platformClient.ApiClient.instance;
 
@@ -50,3 +50,49 @@ function placeCall(aPhoneNumber, aQueueName) {
             });
     });
 }
+
+function consultTransfer(conversationId, participantId, remoteNumber) {
+    console.log('consultTransfer')
+    return new Promise(function (resolve, reject) {
+        
+        let body = {
+            "speakTo": "BOTH",
+            "destination": {
+               "address": remoteNumber
+            }
+         }
+
+        apiInstance.postConversationsCallParticipantConsult(conversationId, participantId, body)
+        .then((data) => {
+            console.log(`postConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
+            resolve();
+        })
+        .catch((err) => {
+            console.log('There was a failure calling postConversationsCallParticipantConsult');
+            console.error(err);
+            reject("Failed to place a Call");
+        });
+
+    });
+}
+
+function consultTransferCancel(conversationId, participantId, remoteNumber) {
+    console.log('consultTransferCancel')
+    return new Promise(function (resolve, reject) {
+        
+        let body = {}
+
+        apiInstance.deleteConversationsCallParticipantConsult(conversationId, participantId)
+        .then((data) => {
+            console.log(`deleteConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
+            resolve();
+        })
+        .catch((err) => {
+            console.log('There was a failure calling deleteConversationsCallParticipantConsult');
+            console.error(err);
+            reject("Failed to cancel transfer");
+        });
+
+    });
+}
+
