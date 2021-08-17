@@ -88,8 +88,7 @@ function consultTransfer() {
         let body = {
             "speakTo": "BOTH",
             "destination": {
-               "address": myParams.remoteNumber,
-               "name": myParams.conversationId
+               "address": myParams.remoteNumber
             }
          }
 
