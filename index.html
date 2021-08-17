@@ -10,17 +10,7 @@
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-    <title>Genesys PureCloud makeCall Functionality</title>
-
-    <script>
-        (function(a,t,c,l,o,u,d){a['_genesysJourneySdk']=o;a[o]=a[o]||function(){
-        (a[o].q=a[o].q||[]).push(arguments)},a[o].l=1*new Date();u=t.createElement(c),
-        d=t.getElementsByTagName(c)[0];u.async=1;u.src=l;u.charset='utf-8';d.parentNode.insertBefore(u,d)
-        })(window, document, 'script', 'https://apps.mypurecloud.ie/journey/sdk/js/web/v1/ac.js', 'ac');
-        ac('init', '3b03b67a-2349-4a03-8b28-c8ac5c26c49a', { region: 'euw1' });
-        ac('pageview');
-      </script>
-
+    <title>GC Recorder</title>
 
 </head>
 
@@ -38,10 +28,8 @@
         <div>
 
             <br>
-            <button type="button" id="send" class="btn btn-info">Start Recording</button>
-
-            <button type="button" id="cancel" class="btn btn-info">Stop Recording</button>
-
+            <button type="button" id="send" class="btn btn-info" disabled>Start Recording</button>
+            <button type="button" id="cancel" class="btn btn-info" disabled>Stop Recording</button>
 
             <!--  <input type="text" id="txtMessage" class="form-control" placeholder="message body"></input> -->
 
@@ -52,6 +40,7 @@
     </center>
     <script>
 
+        let state;
 
         // Read a page's GET URL variables and return them as an associative array.
 
@@ -66,13 +55,24 @@
             return vars;
         }
 
+        // let initState = {
+        //     conversationId: getUrlVars()['conversationId'],
+        //     participantId: getUrlVars()['participantId'],
+        //     remoteNumber: getUrlVars()['remoteNumber']
+        // }
+
+ 
+        // async function init() {
+        //     console.log('Wait for login...');
+        //     state = await login(initState);           
+        // } 
 
         // let queueId = getUrlVars()["queueId"];
         // let phoneNumber = getUrlVars()["phoneNumber"];
 
-        let conversationId = getUrlVars()["conversationId"];
-        let participantId = getUrlVars()["participantId"];
-        let remoteNumber = getUrlVars()["remoteNumber"];
+        // let conversationId = conversationId ? conversationId : getUrlVars()["conversationId"];
+        // let participantId = participantId ? participantId : getUrlVars()["participantId"];
+        // let remoteNumber = remoteNumber ? remoteNumber : getUrlVars()["remoteNumber"];
 
         // Fix PhoneNumber. In case it is tel: at the begining.
         // if (phoneNumber && phoneNumber.length > 5) {
@@ -84,21 +84,22 @@
 
         //$("#txtPhoneNumber").val(phoneNumber);
 
-        $("#send").click(() => {
-            consultTransfer(conversationId, participantId, remoteNumber).then(async (requests) => {
+        $("#send").click(() => {                        
+            consultTransfer().then(async (requests) => {
                     console.log('success');
+
                 }).catch((err) => {
-                    console.error("Failed to call API");
+                    console.error("Failed to call API");                    
                     //showMessage(err, true);
                 });
 
         });
 
         $("#cancel").click(() => {
-            consultTransferCancel(conversationId, participantId).then(async (requests) => {
+            consultTransferCancel().then(async (requests) => {                
                     console.log('success');
                 }).catch((err) => {
-                    console.error("Failed to call API");
+                    console.error("Failed to call API");                    
                     //showMessage(err, true);
                 });
 
