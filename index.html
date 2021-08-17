@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
 
     <title>GC Recorder</title>
 
@@ -30,12 +32,10 @@
             <br>
             <button type="button" id="send" class="btn btn-info" disabled>Start Recording</button>
             <button type="button" id="cancel" class="btn btn-info" disabled>Stop Recording</button>
-
-            <!--  <input type="text" id="txtMessage" class="form-control" placeholder="message body"></input> -->
-
+     
         </div>
         <br>
-        <!-- <input type="text" id="txtPhoneNumber" class="" placeholder="phoneNumber" width="200px"></input> -->
+     
 
     </center>
     <script>
@@ -54,35 +54,7 @@
             }
             return vars;
         }
-
-        // let initState = {
-        //     conversationId: getUrlVars()['conversationId'],
-        //     participantId: getUrlVars()['participantId'],
-        //     remoteNumber: getUrlVars()['remoteNumber']
-        // }
-
- 
-        // async function init() {
-        //     console.log('Wait for login...');
-        //     state = await login(initState);           
-        // } 
-
-        // let queueId = getUrlVars()["queueId"];
-        // let phoneNumber = getUrlVars()["phoneNumber"];
-
-        // let conversationId = conversationId ? conversationId : getUrlVars()["conversationId"];
-        // let participantId = participantId ? participantId : getUrlVars()["participantId"];
-        // let remoteNumber = remoteNumber ? remoteNumber : getUrlVars()["remoteNumber"];
-
-        // Fix PhoneNumber. In case it is tel: at the begining.
-        // if (phoneNumber && phoneNumber.length > 5) {
-        //     if (phoneNumber.substring(0, 4) == 'tel:') {
-        //         phoneNumber = phoneNumber.substring(4)
-
-        //     }
-        // }
-
-        //$("#txtPhoneNumber").val(phoneNumber);
+       
 
         $("#send").click(() => {                        
             consultTransfer().then(async (requests) => {
