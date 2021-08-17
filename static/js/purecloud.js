@@ -95,6 +95,7 @@ function consultTransfer() {
         apiInstance.postConversationsCallParticipantConsult(myParams.conversationId, myParams.participantId, body)
         .then((data) => {
             console.log(`postConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
+            localStorage.setItem('participantId', myParams.participantId);
             resolve();
         })
         .catch((err) => {
@@ -111,8 +112,8 @@ function consultTransferCancel() {
     return new Promise(function (resolve, reject) {
         
         let body = {}
-
-        apiInstance.deleteConversationsCallParticipantConsult(myParams.conversationId, myParams.participantId)
+        let cachedParticipantId = localStorage.getItem('participantId');
+        apiInstance.deleteConversationsCallParticipantConsult(myParams.conversationId, cachedParticipantId)
         .then((data) => {
             console.log(`deleteConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
             resolve();
