@@ -88,9 +88,12 @@ function consultTransfer() {
         let body = {
             "speakTo": "BOTH",
             "destination": {
-               "address": myParams.remoteNumber
+               "address": myParams.remoteNumber,
+               "name": myParams.conversationId
             }
          }
+
+         console.log(body);
 
         apiInstance.postConversationsCallParticipantConsult(myParams.conversationId, myParams.participantId, body)
         .then((data) => {
