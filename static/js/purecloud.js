@@ -43,7 +43,7 @@ function login(_state) {
 client.loginImplicitGrant("1b831a39-844c-4dce-9f7a-2ec29a88ddae", redirectUri, { state: myParams })
 .then((data) => {
     // Make request to GET /api/v2/users/me?expand=presence
-    console.log('Logged-In v2'); 
+    console.log('Logged-In v3'); 
     if (data?.state?.conversationId) {
         myParams = data.state;
         document.getElementById("send").disabled = false;
