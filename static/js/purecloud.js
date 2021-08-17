@@ -92,7 +92,7 @@ function consultTransfer() {
             }
          }
 
-         console.log(body);
+         console.log('make consult', body);
 
         apiInstance.postConversationsCallParticipantConsult(myParams.conversationId, myParams.participantId, body)
         .then((data) => {
