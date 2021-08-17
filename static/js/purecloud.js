@@ -13,8 +13,7 @@ let apiInstance = new platformClient.ConversationsApi();
 let myParams = {
     conversationId: getUrlVars()['conversationId'],
     participantId: getUrlVars()['participantId'],
-    remoteNumber: getUrlVars()['remoteNumber'],
-    consultId: undefined
+    remoteNumber: getUrlVars()['remoteNumber'],    
 };
 
 
