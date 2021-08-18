@@ -8,15 +8,6 @@ client.setEnvironment("mypurecloud.ie");
 client.setPersistSettings(true);
 
 
-
-const clientRecorder = platformClient.ApiClient.instance;
-clientRecorder.setEnvironment("mypurecloud.ie");
-clientRecorder.setPersistSettings(true);
-let analyticsInstance = new platformClient.AnalyticsApi();
-
-
-
-
 let apiInstance = new platformClient.ConversationsApi();
 
 let myParams = {
@@ -26,44 +17,34 @@ let myParams = {
 };
 
 
-function login(_state) {
+// function login(_state) {
 
-    return new Promise(function (resolve, reject) {
-        // Authenticate
-        client.loginImplicitGrant("1b831a39-844c-4dce-9f7a-2ec29a88ddae", redirectUri , { state: _state })
-        .then((data) => {
-            // Make request to GET /api/v2/users/me?expand=presence
-            console.log('Logged-In');
-            console.log(data.state);
-            resolve(data.state);
-        })
-        .catch((err) => {
-        // Handle failure response
-            console.log(err);
-            reject();
-        });
+//     return new Promise(function (resolve, reject) {
+//         // Authenticate
+//         client.loginImplicitGrant("1b831a39-844c-4dce-9f7a-2ec29a88ddae", redirectUri , { state: _state })
+//         .then((data) => {
+//             // Make request to GET /api/v2/users/me?expand=presence
+//             console.log('Logged-In');
+//             console.log(data.state);
+//             resolve(data.state);
+//         })
+//         .catch((err) => {
+//         // Handle failure response
+//             console.log(err);
+//             reject();
+//         });
 
-        //#endregion
+//         //#endregion
 
-    });
-}
+//     });
+// }
 
 
 client.loginImplicitGrant("1b831a39-844c-4dce-9f7a-2ec29a88ddae", redirectUri, { state: myParams })
 .then((data) => {
     // Make request to GET /api/v2/users/me?expand=presence
     console.log('Logged-In'); 
-
-    console.log('Try to auth with Recorder')
-    loginToRecorder();
-    // clientRecorder.loginImplicitGrant("dfc691d6-d534-4334-8869-85e5b7a3dcfa", redirectUri)
-    // .then ((data) => {
-    //     console.log('Logged-In into Recorder');
-
-    // }).catch((err) => {
-    //     console.log(err);
-    // });
-
+ 
     if (data?.state?.conversationId) {
         myParams = data.state;
         document.getElementById("send").disabled = false;
@@ -104,8 +85,7 @@ function placeCall(aPhoneNumber, aQueueName) {
 
 async function consultTransfer() {
     console.log('consultTransfer');
-    let tag = await getConversationIdByExternalTag(myParams.conversationId);
-    console.log(`recorder conversationId ${tag}`);
+
     return new Promise(function (resolve, reject) {
         
         let body = {
@@ -118,10 +98,18 @@ async function consultTransfer() {
         console.log('make consult', body);
 
         apiInstance.postConversationsCallParticipantConsult(myParams.conversationId, myParams.participantId, body)
-        .then((data) => {
+        .then(async (data) => {
+
+           
             console.log(`postConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
-            localStorage.setItem('participantId', myParams.participantId);
-            resolve();
+            
+            
+            let currentParticipant = myParams.participantId;
+            localStorage.setItem('participantId', currentParticipant);
+           
+           resolve();
+
+          
         })
         .catch((err) => {
             console.log('There was a failure calling postConversationsCallParticipantConsult');
@@ -134,20 +122,50 @@ async function consultTransfer() {
 
 function consultTransferCancel() {
     console.log('consultTransferCancel')
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
         
-        let body = {}
         let cachedParticipantId = localStorage.getItem('participantId');
-        apiInstance.deleteConversationsCallParticipantConsult(myParams.conversationId, cachedParticipantId)
-        .then((data) => {
-            console.log(`deleteConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
-            resolve();
+
+        let tags = await getConversationIdsByExternalTag(myParams.conversationId);
+        console.log(`recorder conversationIds ${tags}`);
+
+         // Update Participant Attributes
+         let attrs = {
+            "attributes": {}
+        }
+
+        for (let i = 0; i < tags.length; i++) {
+            let tag = tags[i];
+            console.log(`tag ${tag}`);
+            attrs.attributes[`extRecorderPath${i}`] = `https://apps.mypurecloud.ie/directory/#/engage/admin/interactions/${tag}/details`;
+        }
+                       
+        console.log('attempt to patch ConversationParticipantAttributes for participantId', cachedParticipantId);
+
+        apiInstance.patchConversationParticipantAttributes(myParams.conversationId, cachedParticipantId, attrs)
+        .then(() => {
+            console.log('patchConversationParticipantAttributes returned successfully.');
+            
+            apiInstance.deleteConversationsCallParticipantConsult(myParams.conversationId, cachedParticipantId)
+            .then((data) => {
+                console.log(`deleteConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
+                resolve();
+            })
+            .catch((err) => {
+                console.log('There was a failure calling deleteConversationsCallParticipantConsult');
+                console.error(err);
+                reject("Failed to cancel transfer");
+            });
+
         })
         .catch((err) => {
-            console.log('There was a failure calling deleteConversationsCallParticipantConsult');
+            console.log('There was a failure calling patchConversationParticipantAttributes');
             console.error(err);
-            reject("Failed to cancel transfer");
+            reject();
         });
+
+        
+       
 
     });
 }
@@ -166,85 +184,39 @@ function getUrlVars() {
 
 //#region Recorder Org
 
-
-async function loginToRecorder() {
-    console.log('loginToRecorder()');
-  
-    return new Promise(async (resolve, reject) => {
-      try {
-        await axios({
-          url: 'https://login.mypurecloud.com',
-          method: 'POST',
-          headers: {
-            Authorization: `Basic 598d45d1-57b5-4c73-8e84-1f0f95ffafb5:AS5Q_EeX3F7rpkibtuwz3EmwPnUTVz4NgZ1boynrvmU`,
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((response) => {
-            console.log('Axios request succeeded.');
-            resolve(response);
-          })
-          .catch((error) => {
-            reject(error);
-          })
-          .finally(() => {
-            console.log('Axios request complete.');
-          });
-      } catch (error) {
-        console.error('Error in try/catch: ' + JSON.stringify(error, null, 2));
-        reject({
-          response: {
-            status: 500,
-            statusText: 'Internal Server Error',
-          },
-        });
-      } finally {
-        console.log('Request complete.');
-      }
-    });
-  };
-
-async function getConversationIdByExternalTag(_aTagValue) {
+async function getConversationIdsByExternalTag(_aTagValue) {
     console.log('getConversationIdByExternalTag', _aTagValue);
-    return new Promise(function (resolve, reject) {
-        
-            
-    console.log('Query Analytics on separate Org');
-    let body = 
-    {
-        "interval": "2021-08-16T22:00:00.000Z/2021-08-17T22:00:00.000Z",
-        "order": "desc",
-        "orderBy": "conversationStart",
-        "paging": {
-        "pageSize": 25,
-        "pageNumber": 1
-        },
-        "segmentFilters": [
-        {
-        "type": "or",
-        "predicates": [
-        {
-            "type": "dimension",
-            "dimension": "participantName",
-            "operator": "matches",
-            "value": "Jan Botha"
+    return new Promise(async (resolve, reject) => {
+        try {
+  
+          await axios({
+            url: `http://localhost:4000/getExternalTag?tag=${_aTagValue}`,
+            method: 'GET',
+            headers: {              
+              'Content-Type': 'application/json',
+            },
+          })
+            .then((response) => {
+              console.log('Axios request succeeded.');                            
+              resolve(response?.data?.remoteConversationIds);
+            })
+            .catch((error) => {
+              reject(error);
+            })
+            .finally(() => {
+              console.log('Axios request complete.');
+            });
+        } catch (error) {
+          console.error('Error in try/catch: ' + JSON.stringify(error, null, 2));
+          reject({
+            response: {
+              status: 500,
+              statusText: 'Internal Server Error',
+            },
+          });
+        } finally {
+          console.log('Request complete.');
         }
-        ]
-        }
-        ]        
-    }
-
-    analyticsInstance.postAnalyticsConversationsDetailsQuery(body)
-    .then((data) => {
-        //console.log(`postAnalyticsConversationsDetailsQuery success! data: ${JSON.stringify(data, null, 2)}`);
-        resolve(data?.conversations[0]?.conversationId);
-    })
-    .catch((err) => {
-        console.log('There was a failure calling postAnalyticsConversationsDetailsQuery');
-        console.error(err);
-        reject();
-    });
-
-    });
+      });
 }
 //#endregion
