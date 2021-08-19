@@ -40,22 +40,33 @@ let myParams = {
 // }
 
 
+
 client.loginImplicitGrant("1b831a39-844c-4dce-9f7a-2ec29a88ddae", redirectUri, { state: myParams })
 .then((data) => {
     // Make request to GET /api/v2/users/me?expand=presence
     console.log('Logged-In'); 
  
+    console.log('bTransferDisabled', localStorage.getItem('bTransferDisabled'));
+
     if (data?.state?.conversationId) {
         myParams = data.state;
-        document.getElementById("send").disabled = false;
-        document.getElementById("cancel").disabled = false;
-    };      
+        document.getElementById("send").disabled = localStorage.getItem('bTransferDisabled') === '1' ? true : false;        
+    } else  
+        document.getElementById("send").disabled = true;            
     console.log(myParams); 
 })
 .catch((err) => {
 // Handle failure response
     console.log(err);    
+}).finally(() => {
+   
+    let bState = localStorage.getItem('bTransferDisabled') === '1' ? true : false; 
+    console.log('bTransferDisabled', bState); 
+    document.getElementById("send").disabled = myParams.conversationId ? bState : true;
+    document.getElementById("cancel").disabled = !bState;
+
 });
+
 
 
 
@@ -106,6 +117,9 @@ async function consultTransfer() {
             
             let currentParticipant = myParams.participantId;
             localStorage.setItem('participantId', currentParticipant);
+            localStorage.setItem('bTransferDisabled', '1');            
+            document.getElementById("send").disabled = true;            
+            document.getElementById("cancel").disabled = false;
            
            resolve();
 
@@ -146,9 +160,11 @@ function consultTransferCancel() {
         .then(() => {
             console.log('patchConversationParticipantAttributes returned successfully.');
             
+            
             apiInstance.deleteConversationsCallParticipantConsult(myParams.conversationId, cachedParticipantId)
             .then((data) => {
                 console.log(`deleteConversationsCallParticipantConsult success! data: ${JSON.stringify(data, null, 2)}`);
+
                 resolve();
             })
             .catch((err) => {
@@ -162,6 +178,10 @@ function consultTransferCancel() {
             console.log('There was a failure calling patchConversationParticipantAttributes');
             console.error(err);
             reject();
+        }).finally (() => {
+            localStorage.setItem('bTransferDisabled', '0');                
+            document.getElementById("send").disabled = false;            
+            document.getElementById("cancel").disabled = true;
         });
 
         
